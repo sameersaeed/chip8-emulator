@@ -357,7 +357,7 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
                     index = V[x] * 0x5;
                     pc += 2;
                     break;
-                case _Fx33:                        // Fx33  store BCD representation of Vx in I, I+1 and I+2
+                case _Fx33:                        // Fx33  : store BCD representation of Vx in I, I+1 and I+2
                     memory[index]     = V[x] / 100;
                     memory[index + 1] = (V[x] / 10) % 10;
                     memory[index + 2] = V[x] % 10;
