@@ -1,10 +1,5 @@
 #include "Chip8.h"
 
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <time.h>
-
 enum opcodes                // for instructions to be executed in CPU cy
 {
     _00E_    =   0x0000,    // 00E?
@@ -151,13 +146,13 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
         case _00E_:                                // 00E?
             switch (mask) 
             {
-                case _00E0:                        // 00E0 : CLS
+                case _00E0:                        // 00E0 : clears display
                     for (int i = 0; i < 2048; ++i) 
-                        display[i] = 0;            // clears display
+                        display[i] = 0;            
                     drawFlag = true;
                     pc += 2;
                     break;
-                case _00EE:                        // 00EE : RET
+                case _00EE:                        // 00EE : returns from subroutine
                     --sp;
                     pc = stack[sp];
                     pc += 2;
@@ -167,89 +162,89 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
                     return;
             } 
             break;
-        case _1nnn:                                // 1nnn : JMP addr
+        case _1nnn:                                // 1nnn : jumps to addr
             pc = addr;
             break;
-        case _2nnn:                                // 2nnn : CALL addr
+        case _2nnn:                                // 2nnn : calls subroutine at addr
             stack[sp] = pc;
             ++sp;
             pc = addr;
             break;
-        case _3xkk:                                // 3xkk : SE Vx, byte
+        case _3xkk:                                // 3xkk : skips next instruction if Vx = kk
             if (V[x] == byte)
                 pc += 4;
             else
                 pc += 2;
             break;
-        case _4xkk:                                // 4xkk : SNE Vx, byte
+        case _4xkk:                                // 4xkk : skips next instruction if Vx != kk
             if (V[x] != byte)
                 pc += 4;
             else
                 pc += 2;
             break;
-        case _5xy0:                                // 5xy0 : SE Vx, Vy
+        case _5xy0:                                // 5xy0 : skips next instruction of Vx = Vy
             if (V[x] == V[y])
                 pc += 4;
             else
                 pc += 2;
             break;
-        case _6xkk:                                // 6xkk : LD Vx, byte
+        case _6xkk:                                // 6xkk : puts value of kk into register Vx 
             V[x] = byte;
             pc += 2;
             break;
-        case _7xkk:                                // 7xkk : ADD Vx, byte
+        case _7xkk:                                // 7xkk : adds kk to Vx, stores result in Vx
             V[x] += byte;
             pc += 2;
             break;
         case _8xy_:                                // 8xy?
             switch (mask) 
             {
-                case _8xy0:                        // 8xy0 : LD Vx, Vy
+                case _8xy0:                        // 8xy0 : stores value of Vy in Vx
                     V[x] = V[y];
                     pc += 2;
                     break;
-                case _8xy1:                        // 8xy1 : OR Vx, Vy
+                case _8xy1:                        // 8xy1 : performs OR on Vx and Vy, stores result in Vx
                     V[x] |= V[y];
                     pc += 2;
                     break;
-                case _8xy2:                        // 8xy2 : AND Vx, Vy 
+                case _8xy2:                        // 8xy2 : performs AND on Vx and Vy, stores result in Vx 
                     V[x] &= V[y];
                     pc += 2;
                     break;
-                case _8xy3:                        // 8xy3 : XOR Vx, Vy
+                case _8xy3:                        // 8xy3 : performs XOR on Vx and Vy, stores result in Vx
                     V[x] ^= V[y];
                     pc += 2;
                     break;
-                case _8xy4:                        // 8xy4 : ADD Vx, Vy
-                    V[x] += V[y];
+                case _8xy4:                        // 8xy4 : adds Vx and Vy. if result > 8 bits, VF=1, else VF=0.
+                    V[x] += V[y];                  //        only lowest 8 bits of result are stored in Vx
                     if(V[y] > (0xFF - V[x]))
                         V[0xF] = 1; //carry
                     else
                         V[0xF] = 0;
                     pc += 2;
                     break;
-                case _8xy5:                        // 8xy5 : SUB Vx, Vy
-                    if(V[y] > V[x])
-                        V[0xF] = 0; // there is a borrow
+                case _8xy5:                        // 8xy5 : if Vx > Vy, VF=1, else VF=0. then Vx -= Vy and results
+                    if(V[y] > V[x])                //        are stored in Vx
+                        V[0xF] = 0; // borrow
                     else
                         V[0xF] = 1;
                     V[x] -= V[y];
                     pc += 2;
                     break;
-                case _8xy6:                        // 8xy6 : SHR Vx {, Vy}
+                case _8xy6:                        // 8xy6 : if LSB of Vx=1, VF=1, else VF=0. then shift Vx right by 1 (div by 2)
                     V[0xF] = V[x] & 0x1;
                     V[x] >>= 1;
                     pc += 2;
                     break;
-                case _8xy7:                        // 8xy7 : SUBN Vx, Vy
-                    if(V[x] > V[y])	// VY-VX
-                        V[0xF] = 0; // there is a borrow
+                case _8xy7:                        // 8xy7 : if Vy > Vx, VF=1, else VF=0. then Vx = Vy - Vx and results
+                    if(V[x] > V[y])	               //        are stored in Vx
+                        V[0xF] = 0; // borrow
                     else
                         V[0xF] = 1;
                     V[x] = V[y] - V[x];
                     pc += 2;
                     break;
-                case _8xyE:                        // 8xyE : SHL Vx, Vy
+                case _8xyE:                        // 8xyE : if MSB of Vx=1, VF=1, else VF=0. then shift Vx left by 1 (mul by 2)
                     V[0xF] = V[x] >> 7;
                     V[x] <<= 1;
                     pc += 2;
@@ -258,28 +253,28 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
                     printf("\nUnknown opcode [0x8xy?]: %.4X\n", opcode);
             }
             break;
-        case _9xy0:                                // 9xy0 : SNE Vx, Vy
+        case _9xy0:                                // 9xy0 : skip next instruction if Vx != Vy
             if (V[x] != V[y])
                 pc += 4;
             else
                 pc += 2;
             break;
-        case _Annn:                                // Annn : LD I(ndex), addr
+        case _Annn:                                // Annn : set I = nnn
             index = addr;
             pc += 2;
             break;
-        case _Bnnn:                                // Bnnn : JP V0, addr
+        case _Bnnn:                                // Bnnn : jump to location nnn + V0
             pc = (addr) + V[0];
             break;
-        case _Cxkk:                                // Cxkk : RND Vx, byte
+        case _Cxkk:                                // Cxkk : set Vx = random byte & kk
             V[x] = (rand() % (0xFF + 1)) & byte;
             pc += 2;
             break;
-        case _Dxyn:                                // Dxyn : DRW Vx, Vy, nibble
-        {
-            uint16_t drawX    = V[x];
+        case _Dxyn:                                // Dxyn : display n-byte sprite starting from 
+        {                                          //        memory location I at (Vx, Vy), set
+            uint16_t drawX    = V[x];              //        VF = collision
             uint16_t drawY    = V[y];
-            uint16_t height   = mask;               // nibble mask
+            uint16_t height   = mask;              // nibble mask
             uint16_t px;
 
             V[0xF] = 0;
@@ -303,13 +298,13 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
         case _Ex__:                                // Ex??
             switch (byte) 
             {
-                case _Ex9E:                        // Ex9E : SKP Vx
+                case _Ex9E:                        // Ex9E : skip next instruction if key with value of Vx is pressed
                     if (key[V[x]] != 0)
                         pc +=  4;
                     else
                         pc += 2;
                     break;
-                case _ExA1:                        // ExA1 : SKNP Vx
+                case _ExA1:                        // ExA1 : skip next instruction if key with value of Vx isnt pressed
                     if (key[V[x]] == 0)
                         pc +=  4;
                     else
@@ -322,11 +317,11 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
         case _Fx__:                                // Fx??
             switch (byte)
             {
-                case _Fx07:                        // Fx07 : LD Vx, DT
+                case _Fx07:                        // Fx07 : set Vx to the value of the delay timer
                     V[x] = delayTimer;
                     pc += 2;
                     break;
-                case _Fx0A:                        // Fx0A : LD Vx, K(ey)
+                case _Fx0A:                        // Fx0A : wait for a key press, store the value into Vx
                 {
                     bool key_pressed = false;
                     for(int i = 0; i < 16; ++i)
@@ -342,15 +337,15 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
                     pc += 2;
                 }
                     break;
-                case _Fx15:                        // Fx15 : LD D(elay)T(imer), Vx
+                case _Fx15:                        // Fx15 : set delay timer to the value of Vx
                     delayTimer = V[x];
                     pc += 2;
                     break;
-                case _Fx18:                        // Fx18 : LD S(ound)T(imer), Vx
+                case _Fx18:                        // Fx18 : set sound timer to the value of Vx
                     soundTimer = V[x];
                     pc += 2;
                     break;
-                case _Fx1E:                        // Fx1E : ADD I(ndex), Vx
+                case _Fx1E:                        // Fx1E : add Vx to I
                     if(index + V[x] > 0xFFF)
                         V[0xF] = 1;
                     else
@@ -358,23 +353,23 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
                     index += V[x];
                     pc += 2;
                     break;
-                case _Fx29:                        // Fx29 : LD F, Vx
+                case _Fx29:                        // Fx29 : set I to location of sprite for digit Vx
                     index = V[x] * 0x5;
                     pc += 2;
                     break;
-                case _Fx33:                        // Fx33 : LD B, Vx
+                case _Fx33:                        // Fx33  store BCD representation of Vx in I, I+1 and I+2
                     memory[index]     = V[x] / 100;
                     memory[index + 1] = (V[x] / 10) % 10;
                     memory[index + 2] = V[x] % 10;
                     pc += 2;
                     break;
-                case _Fx55:                        // Fx55 : LD [I(ndex)], Vx
+                case _Fx55:                        // Fx55 : store registers V0-Vx in memory starting at location I
                     for (int i = 0; i <= (x); ++i)
                         memory[index + i] = V[i];
                     index += (x) + 1;
                     pc += 2;
                     break;
-                case _Fx65:                        // Fx65 : LD Vx, [I(ndex)]
+                case _Fx65:                        // Fx65 : read registers V0-Vx from memory starting at location I
                     for (int i = 0; i <= (x); ++i)
                         V[i] = memory[index + i];
                     index += (x) + 1;

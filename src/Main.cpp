@@ -7,9 +7,6 @@
 #include "Chip8.h"
 
 #include <iostream>
-#include <chrono>
-#include <filesystem>
-#include <fstream>
 #include <thread>
 #include "SDL2/SDL.h"
 
