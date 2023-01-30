@@ -41,11 +41,11 @@ an interpreter for the CHIP-8 programming language written in C++. uses SDL for 
 
 ### **sample installation / run:**
 ```console
-                         ~/#  git clone "https://github.com/sameersaeed/chip8-interpreter" && cd chip8-interpreter
-        ~/chip8-interpreter#  mkdir build && cd build
-  ~/chip8-interpreter/build#  cmake .. 
-  ~/chip8-interpreter/build#  make
-  ~/chip8-interpreter/build#  ./chip8 3 ../roms/Maze.ch8        <-- creates a 3 * (64 x 32px) = 192 x 96px display
+                          ...#  git clone "https://github.com/sameersaeed/chip8-interpreter" && cd chip8-interpreter
+        .../chip8-interpreter#  mkdir build && cd build
+  .../chip8-interpreter/build#  cmake .. 
+  .../chip8-interpreter/build#  make
+  .../chip8-interpreter/build#  ./chip8 3 ../roms/Maze.ch8        <-- creates a 3 * (64 x 32px) = 192 x 96px display
 ```
 <br><br>
 
