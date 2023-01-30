@@ -1,0 +1,3 @@
+/home/sameer/Documents/Visual Studio Code/CHIP8/build/CMakeFiles/Chip8.dir
+/home/sameer/Documents/Visual Studio Code/CHIP8/build/CMakeFiles/edit_cache.dir
+/home/sameer/Documents/Visual Studio Code/CHIP8/build/CMakeFiles/rebuild_cache.dir
