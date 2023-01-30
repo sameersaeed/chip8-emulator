@@ -1,10 +1,15 @@
 # CHIP-8 Interpreter
 
+an interpreter for the CHIP-8 programming language, uses SDL for graphics
+<br><br>
+
+
+
 usage:
 ```
 ./chip8 [screen-scale-factor] <path-to-ROM>
 ```
-
+<br><br>
 
 
 
@@ -12,7 +17,7 @@ build instructions:
 ```
   git clone "https://github.com/sameersaeed/chip8-interpreter"
 ```
-  if you do not have the SDL2 library installed:
+&emsp; if you do not have the SDL2 library installed:
 ```
   Debian/Ubuntu:  sudo apt-get install libsdl2-dev -y
   
@@ -20,19 +25,18 @@ build instructions:
     https://wiki.libsdl.org/SDL2/Installation        
 ```
 
-  (within project directory)
+&emsp; (within project directory)
 ```
   mkdir build && cd build
   cmake ..
   make
   ./chip8 [scale] ../roms/<ROM>
 ```
+<br><br>
 
 
 
-
-
-  sample installation / run:
+&emsp; sample installation / run:
 ```
                          ~/#  git clone "https://github.com/sameersaeed/chip8-interpreter" && cd chip8-interpreter
         ~/chip8-interpreter#  mkdir build && cd build
