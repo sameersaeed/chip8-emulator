@@ -1,6 +1,10 @@
 # CHIP-8 Interpreter
 
-an interpreter for the CHIP-8 programming language written in C++. uses SDL for graphics
+an interpreter for the CHIP-8 programming language written in C++. uses SDL for input/graphics
+<br><br>
+CHIP-8 was first introduced in the 1970s. many famous clasic games like Tetris, Pac-Man, Pong, etc. were ported to it
+<br><br>
+this is an interpreter and not an emulator because the CHIP-8 isn't a physical machine being emulated, but rather a virutal machine running CHIP-8 programs
 <br><br>
 
 
@@ -13,18 +17,34 @@ an interpreter for the CHIP-8 programming language written in C++. uses SDL for 
 
 
 
-### **setup:**
-```
-  git clone "https://github.com/sameersaeed/chip8-interpreter"
-```
-<br>
+### **prerequisite libraries:**
 
-&emsp; if you do not have the SDL2 library installed:
+SDL2
+<br>
+&emsp; installation:
 ```console
   Debian/Ubuntu:  sudo apt-get install libsdl2-dev -y
   
-  or see the SDL2 wiki:
+  or check out the SDL2 wiki's Installation section:
     https://wiki.libsdl.org/SDL2/Installation        
+```
+<br>
+
+CMake
+<br>
+&emsp; installation:
+```console
+  Debian/Ubuntu:  sudo apt-get install cmake
+  
+  or download directly from their website:
+    https://cmake.org/download/
+```
+<br>
+
+### **setup:**
+&emsp; to install the repository 
+```
+  git clone "https://github.com/sameersaeed/chip8-interpreter"
 ```
 <br>
 
