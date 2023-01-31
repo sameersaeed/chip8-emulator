@@ -10,12 +10,12 @@
 #include <thread>
 #include "SDL2/SDL.h"
 
-uint8_t keymap[16] = 
+uint8_t keypad[16] = 
 {
     SDLK_x,
-    SDLK_1,
-    SDLK_2,
-    SDLK_3,
+    SDLK_1, 
+    SDLK_2, 
+    SDLK_3, 
     SDLK_q,
     SDLK_w,
     SDLK_e,
@@ -27,7 +27,7 @@ uint8_t keymap[16] =
     SDLK_4,
     SDLK_r,
     SDLK_f,
-    SDLK_v,
+    SDLK_v
 };
 
 int main(int argc, char* argv[]) 
@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) 
     {
-        std::cout << "[ERROR\t\tCould not initialize SDL: " << SDL_GetError() << "\n";
+        std::cout << "[ERROR]\t\tCould not initialize SDL: " << SDL_GetError() << "\n";
         return -3;
     }
 
@@ -76,11 +76,11 @@ int main(int argc, char* argv[])
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Texture* texture = SDL_CreateTexture(renderer,
-                                                SDL_PIXELFORMAT_ARGB8888,
-                                                SDL_TEXTUREACCESS_STREAMING,
-                                                64, 
-                                                32
-                                                );
+                                            SDL_PIXELFORMAT_ARGB8888,
+                                            SDL_TEXTUREACCESS_STREAMING,
+                                            64, 
+                                            32
+                                            );
 
     if (!chip8.loadROM(argv[2]))
     {
@@ -99,21 +99,20 @@ int main(int argc, char* argv[])
 
             if (e.type == SDL_KEYDOWN)                  // key pressed
             {
-                if (e.key.keysym.sym == SDLK_ESCAPE)
-                    return 0;
+                if (e.key.keysym.sym == SDLK_ESCAPE) return 0;
 
                 for (int i = 0; i < 16; ++i) 
                 {
-                    if (e.key.keysym.sym == keymap[i])  // get key
-                        chip8.key[i] = 1;               // set state to ON
+                    if (e.key.keysym.sym == keypad[i])  // get key
+                        chip8.key.at(i) = 1;            // set state to ON
                 }
             }
             if (e.type == SDL_KEYUP)                    // key released
             {
                 for (int i = 0; i < 16; ++i) 
                 {
-                    if (e.key.keysym.sym == keymap[i])  // get key
-                        chip8.key[i] = 0;               // set state to OFF
+                    if (e.key.keysym.sym == keypad[i])  // get key
+                        chip8.key.at(i) = 0;            // set state to OFF
                 }
             }
         }
@@ -140,6 +139,6 @@ int main(int argc, char* argv[])
                            );
             SDL_RenderPresent(renderer);
         }
-        std::this_thread::sleep_for(std::chrono::microseconds(1000));   // .1s delay
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }

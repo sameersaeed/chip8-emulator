@@ -1,100 +1,29 @@
 #include "Chip8.h"
 
-enum opcodes                // for instructions to be executed in CPU cy
-{
-    _00E_    =   0x0000,    // 00E?
-    _00E0    =   0x0000,    //  00E0 : CLS
-    _00EE    =   0x000E,    //  00EE : RET
-    _1nnn    =   0x1000,    // 1nnn : JMP addr
-    _2nnn    =   0x2000,    // 2nnn : CALL addr
-    _3xkk    =   0x3000,    // 3xkk : SE Vx, byte
-    _4xkk    =   0x4000,    // 4xkk : SNE Vx, byte
-    _5xy0    =   0x5000,    // 5xy0 : SE Vx, Vy
-    _6xkk    =   0x6000,    // 6xkk : LD Vx, byte
-    _7xkk    =   0x7000,    // 7xkk : ADD Vx, byte
-    _8xy_    =   0x8000,    // 8xy?
-    _8xy0    =   0x0000,    //  8xy0 : LD Vx, Vy
-    _8xy1    =   0x0001,    //  8xy1 : OR Vx, Vy
-    _8xy2    =   0x0002,    //  8xy2 : AND Vx, Vy 
-    _8xy3    =   0x0003,    //  8xy3 : XOR Vx, Vy
-    _8xy4    =   0x0004,    //  8xy4 : ADD Vx, Vy
-    _8xy5    =   0x0005,    //  8xy5 : SUB Vx, Vy
-    _8xy6    =   0x0006,    //  8xy6 : SHR Vx {, Vy}
-    _8xy7    =   0x0007,    //  8xy7 : SUBN Vx, Vy
-    _8xyE    =   0x000E,    //  8xyE : SHL Vx, Vy
-    _9xy0    =   0x9000,    // 9xy0 : SNE Vx, Vy
-    _Annn    =   0xA000,    // Annn : LD I, addr
-    _Bnnn    =   0xB000,    // Bnnn : JP V0, addr
-    _Cxkk    =   0xC000,    // Cxkk : RND Vx, byte
-    _Dxyn    =   0xD000,    // Dxyn : DRW Vx, Vy, nibble
-    _Ex__    =   0xE000,    // Ex??
-    _Ex9E    =   0x009E,    //  Ex9E : SKP Vx
-    _ExA1    =   0x00A1,    //  ExA1 : SKNP Vx
-    _Fx__    =   0xF000,    // Fx??
-    _Fx07    =   0x0007,    //  Fx07 : LD Vx, DT
-    _Fx0A    =   0x000A,    //  Fx0A : LD Vx, K
-    _Fx15    =   0x0015,    //  Fx15 : LD DT, Vx
-    _Fx18    =   0x0018,    //  Fx18 : LD ST, Vx
-    _Fx1E    =   0x001E,    //  Fx1E : ADD I, Vx
-    _Fx29    =   0x3029,    //  Fx29 : LD F, Vx
-    _Fx33    =   0x0033,    //  Fx33 : LD B, Vx
-    _Fx55    =   0x0055,    //  Fx55 : LD [I], Vx
-    _Fx65    =   0x0065,    //  Fx65 : LD Vx, [I]
-};
-
-Chip8::Chip8()
-{
-    pc      = 0x200;        // ROM instructions are stored starting at this point
-    opcode  = 0;
-    index   = 0;
-    sp      = 0; 
-}
+Chip8::Chip8() : pc(0x200), opcode(0), index(0), sp(0){}
 
 Chip8::~Chip8(){}
 
-
-uint8_t fontset[80] =               // font hex representations
-{
-    0xF0, 0x90, 0x90, 0x90, 0xF0,   // 0
-    0x20, 0x60, 0x20, 0x20, 0x70,   // 1
-    0xF0, 0x10, 0xF0, 0x80, 0xF0,   // 2
-    0xF0, 0x10, 0xF0, 0x10, 0xF0,   // 3
-    0x90, 0x90, 0xF0, 0x10, 0x10,   // 4
-    0xF0, 0x80, 0xF0, 0x10, 0xF0,   // 5
-    0xF0, 0x80, 0xF0, 0x90, 0xF0,   // 6
-    0xF0, 0x10, 0x20, 0x40, 0x40,   // 7
-    0xF0, 0x90, 0xF0, 0x90, 0xF0,   // 8
-    0xF0, 0x90, 0xF0, 0x10, 0xF0,   // 9
-    0xF0, 0x90, 0xF0, 0x90, 0x90,   // A
-    0xE0, 0x90, 0xE0, 0x90, 0xE0,   // B
-    0xF0, 0x80, 0x80, 0x80, 0xF0,   // C
-    0xE0, 0x90, 0x90, 0x90, 0xE0,   // D
-    0xF0, 0x80, 0xF0, 0x80, 0xF0,   // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80    // F
-};
-
 void Chip8::reset()
 {
-    // resetting data 
-    for (int i = 0; i < 4096; ++i)  // clearing memory
-        memory[i] = 0;
+    memory.resize(4096);       // initializing vector sizes
+    display.resize(64 * 64);
+    stack.resize(16);
+    key.resize(16);
+    V.resize(16);
 
-    for (int i = 0; i < 2048; ++i)
-        display[i] = 0;             // emptying all pxs
-
-    for (int i = 0; i < 80; ++i)
-        memory[i] = fontset[i];     // loading fonts into memory
-
-    for (int i = 0; i < 16; ++i)
-    {
-        stack[i]    = 0;    // emptying stack
-        key[i]      = 0;    // keypad inputs
-        V[i]        = 0;    // registers V0-VF
-    }
+    std::fill(memory.begin(), memory.end(), 0);     // clearing memory
+    std::fill(display.begin(), display.end(), 0);   // toggling all pixels off
+    std::fill(stack.begin(), stack.end(), 0);       // emptying stack
+    std::fill(key.begin(), key.end(), 0);           // resetting keypad inputs
+    std::fill(V.begin(), V.end(), 0);               // clearing registers V0-VF
 
     // resetting timers
     soundTimer = 0;
     delayTimer = 0;
+
+    for (int i = 0; i < 80; ++i)
+        memory[i] = fontset[i];     // loading fonts into memory
 
     srand(time(NULL));     // rng
 }
@@ -103,23 +32,22 @@ bool Chip8::loadROM(const char* ROM)
 {
     reset();   // initializing data
 
-    // reading file as binary, move to EOF
-    std::ifstream f(ROM, std::ios::ate);
+    std::ifstream f(ROM, std::ios::ate);        // seeking EOF
 
     if (f.is_open())
     {
         std::streampos fileSize = f.tellg();    // getting file's size
-        char* buf = new char[fileSize];         // storing file data in buffer
+        char* buf = new char[fileSize];         // file buffer
 
         // reading file from beginning to end
         f.seekg(0, std::ios::beg);
-        f.read(buf, fileSize);
+        f.read(buf, fileSize);                  // storing data within buffer
         f.close();
 
         for(long i = 0; i < fileSize; ++i)
             memory[0x200 + i] = buf[i];         // loading buffer data to memory
 
-        delete[] buf;                           // free buffer memory
+        delete[] buf;                           // freeing buffer memory
         return true;
     }
     else
@@ -132,8 +60,7 @@ bool Chip8::loadROM(const char* ROM)
 void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
 { 
     // fetch
-    opcode = memory[pc] << 8 | memory[pc + 1];
-
+    opcode  = memory[pc] << 8 | memory[pc + 1];
     mask    = opcode & 0x000F;
     byte    = opcode & 0x00FF;
     addr    = opcode & 0x0FFF;
@@ -171,22 +98,13 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
             pc = addr;
             break;
         case _3xkk:                                // 3xkk : skips next instruction if Vx = kk
-            if (V[x] == byte)
-                pc += 4;
-            else
-                pc += 2;
+            pc += (V[x] == byte) ? 4 : 2;
             break;
         case _4xkk:                                // 4xkk : skips next instruction if Vx != kk
-            if (V[x] != byte)
-                pc += 4;
-            else
-                pc += 2;
+            pc += (V[x] != byte) ? 4 : 2;
             break;
         case _5xy0:                                // 5xy0 : skips next instruction of Vx = Vy
-            if (V[x] == V[y])
-                pc += 4;
-            else
-                pc += 2;
+            pc += (V[x] == V[y]) ? 4 : 2;
             break;
         case _6xkk:                                // 6xkk : puts value of kk into register Vx 
             V[x] = byte;
@@ -217,36 +135,30 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
                     break;
                 case _8xy4:                        // 8xy4 : adds Vx and Vy. if result > 8 bits, VF=1, else VF=0.
                     V[x] += V[y];                  //        only lowest 8 bits of result are stored in Vx
-                    if(V[y] > (0xFF - V[x]))
-                        V[0xF] = 1; //carry
-                    else
-                        V[0xF] = 0;
+                    V[0xF] = (V[y] > 0x00F) ?
+                                1 : 0;
                     pc += 2;
                     break;
-                case _8xy5:                        // 8xy5 : if Vx > Vy, VF=1, else VF=0. then Vx -= Vy and results
-                    if(V[y] > V[x])                //        are stored in Vx
-                        V[0xF] = 0; // borrow
-                    else
-                        V[0xF] = 1;
-                    V[x] -= V[y];
+                case _8xy5:                        // 8xy5 : Vx -= Vy. results are stored in Vx. 
+                    V[x] = V[x] - V[y];            //        then if Vx > Vy, VF=1, else VF=0.
+                    V[0xF] = (V[x] > V[y]) ?       
+                             1 : 0;
                     pc += 2;
                     break;
                 case _8xy6:                        // 8xy6 : if LSB of Vx=1, VF=1, else VF=0. then shift Vx right by 1 (div by 2)
-                    V[0xF] = V[x] & 0x1;
-                    V[x] >>= 1;
+                    V[0xF] = (V[x] & 0x1);
+                    V[x] >>= V[y];
                     pc += 2;
                     break;
-                case _8xy7:                        // 8xy7 : if Vy > Vx, VF=1, else VF=0. then Vx = Vy - Vx and results
-                    if(V[x] > V[y])	               //        are stored in Vx
-                        V[0xF] = 0; // borrow
-                    else
-                        V[0xF] = 1;
-                    V[x] = V[y] - V[x];
+                case _8xy7:                        // 8xy7 : Vx =- Vy. results are stored in Vx.
+                    V[x] = V[y] - V[x];            //        then if Vx > Vy, VF=1, else VF=0.
+                    V[0xF] = (V[x] > V[y]) ?       
+                             0 : 1;
                     pc += 2;
                     break;
                 case _8xyE:                        // 8xyE : if MSB of Vx=1, VF=1, else VF=0. then shift Vx left by 1 (mul by 2)
-                    V[0xF] = V[x] >> 7;
                     V[x] <<= 1;
+                    V[0xF] = (V[x] >> 7);
                     pc += 2;
                     break;
                 default:                           // invalid opcode
@@ -254,10 +166,7 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
             }
             break;
         case _9xy0:                                // 9xy0 : skip next instruction if Vx != Vy
-            if (V[x] != V[y])
-                pc += 4;
-            else
-                pc += 2;
+             pc += (V[x] != V[y]) ? 4 : 2;
             break;
         case _Annn:                                // Annn : set I = nnn
             index = addr;
@@ -272,37 +181,34 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
             break;
         case _Dxyn:                                // Dxyn : display n-byte sprite starting from 
         {                                          //        memory location I at (Vx, Vy), set
-            uint16_t drawX    = V[x];              //        VF = collision
-            uint16_t drawY    = V[y];
-            uint16_t height   = mask;              // nibble mask
+            uint16_t xPos    = V[x] % 64;          //        VF = collision
+            uint16_t yPos    = V[y] % 32;
             uint16_t px;
 
             V[0xF] = 0;
-            for (int i = 0; i < height; i++)
+            for (int i = 0; i < mask; ++i)        // sprite row
             {
-                px = memory[index + i];
-                for(int j = 0; j < 8; j++)
+                px = memory[index + i];             // pixel in sprite row 
+                for(int j = 0; j < 8; ++j)          // MSB --> LSB, i.e left to right
                 {
-                    if((px & (0x80 >> j)) != 0)
+                    if((px & (0x80 >> j)) != 0)     
                     {
-                        if(display[(drawX + j + ((drawY + i) * 64))] == 1)
+                        if(display[(xPos + j + ((yPos + i) * 64))] == 1) 
                             V[0xF] = 1;
-                        display[drawX + j + ((drawY + i) * 64)] ^= 1;
+                        display[xPos + j + ((yPos + i) * 64)] ^= 1;
                     }
                 }
             }
             drawFlag = true;
             pc += 2;
-            break;
         }
+            break;
+
         case _Ex__:                                // Ex??
             switch (byte) 
             {
                 case _Ex9E:                        // Ex9E : skip next instruction if key with value of Vx is pressed
-                    if (key[V[x]] != 0)
-                        pc +=  4;
-                    else
-                        pc += 2;
+                    pc += (key[V[x]] != 0) ? 4 : 2;
                     break;
                 case _ExA1:                        // ExA1 : skip next instruction if key with value of Vx isnt pressed
                     if (key[V[x]] == 0)
@@ -364,15 +270,15 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
                     pc += 2;
                     break;
                 case _Fx55:                        // Fx55 : store registers V0-Vx in memory starting at location I
-                    for (int i = 0; i <= (x); ++i)
+                    for (int i = 0; i <= x; ++i)
                         memory[index + i] = V[i];
-                    index += (x) + 1;
+                    index += x + 1;
                     pc += 2;
                     break;
                 case _Fx65:                        // Fx65 : read registers V0-Vx from memory starting at location I
-                    for (int i = 0; i <= (x); ++i)
+                    for (int i = 0; i <= x; ++i)
                         V[i] = memory[index + i];
-                    index += (x) + 1;
+                    index += x + 1;
                     pc += 2;
                     break;
                 default:                            // invalid opcode
@@ -382,7 +288,7 @@ void Chip8::cycle() // cpu cycles: fetch --> decode --> execute opcode
         default:                                    // invalid opcode
             printf("Invalid opcode: %.4X\n", opcode);
     }
-    // updating timers
+    // updating timers 
     if (delayTimer > 0)
         --delayTimer;
     if (soundTimer > 0)
