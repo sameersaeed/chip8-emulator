@@ -42,7 +42,7 @@ CMake
 <br>
 
 ### **setup:**
-&emsp; to install the repository 
+&emsp; to install this repository 
 ```
   git clone "https://github.com/sameersaeed/chip8-interpreter"
 ```
