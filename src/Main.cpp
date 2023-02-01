@@ -44,11 +44,13 @@ int main(int argc, char* argv[])
         return -2;
     }
 
-    uint32_t buffer[2048];      // storing pixel data
-    Chip8 chip8 = Chip8();      // creating chip8 instance
+    std::vector<uint32_t> buffer;       // storing pixel data
+    buffer.resize(2048);
+    
+    Chip8 chip8 = Chip8();              // creating chip8 instance
 
     SDL_Window* window = NULL;
-    int scale = atoi(argv[1]);  // user can set window size
+    int scale = atoi(argv[1]);          // user can set window size
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) 
     {
@@ -128,7 +130,7 @@ int main(int argc, char* argv[])
 
             SDL_UpdateTexture(texture, 
                               NULL, 
-                              buffer, 
+                              static_cast<void*>(buffer.data()), 
                               64 * sizeof(uint32_t)
                               );
             SDL_RenderClear(renderer);
