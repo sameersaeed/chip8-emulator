@@ -2,7 +2,7 @@
 
 an interpreter for the CHIP-8 programming language written in C++. uses SDL for input/graphics
 <br><br>
-CHIP-8 was first introduced in the 1970s. many famous clasic games like Tetris, Pac-Man, Pong, etc. were ported to it
+CHIP-8 was first introduced in the 1970s. many famous classic games like Tetris, Pac-Man, Pong, etc. were ported to it
 <br><br>
 this is an interpreter and not an emulator because the CHIP-8 isn't a physical machine being emulated, but rather a virutal machine running CHIP-8 programs
 <br><br>
