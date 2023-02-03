@@ -1,6 +1,6 @@
 /**
  * References:
- * - http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/Chip8.pdf
+ * - http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/chip8.pdf
  * - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 */
 
@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <thread>
+#include <memory>
 #include "SDL2/SDL.h"
 
 uint8_t keypad[16] = 
@@ -44,13 +45,13 @@ int main(int argc, char* argv[])
         return -2;
     }
 
-    std::vector<uint32_t> buffer;       // storing pixel data
+    std::vector<uint32_t> buffer;                   // storing pixel data
     buffer.resize(2048);
     
-    Chip8 chip8 = Chip8();              // creating chip8 instance
+    std::unique_ptr<Chip8> chip8{ new Chip8() };    // creating chip8 instance
 
     SDL_Window* window = NULL;
-    int scale = atoi(argv[1]);          // user can set window size
+    int scale = atoi(argv[1]);                      // user can set window size
 
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) 
     {
@@ -84,7 +85,7 @@ int main(int argc, char* argv[])
                                             32
                                             );
 
-    if (!chip8.loadROM(argv[2]))
+    if (!chip8->loadROM(argv[2]))
     {
         std::cerr << "[ERROR]\t\t Couldn't load ROM\n";
         return -5;
@@ -92,8 +93,8 @@ int main(int argc, char* argv[])
 
     while (1)               // emulator loaded succesfully
     {
-        chip8.cycle();      // cycle thru instructions
-
+        chip8->cycle();      // cycle thru instructions
+        
         SDL_Event e;
         while (SDL_PollEvent(&e)) 
         {
@@ -106,7 +107,7 @@ int main(int argc, char* argv[])
                 for (int i = 0; i < 16; ++i) 
                 {
                     if (e.key.keysym.sym == keypad[i])  // get key
-                        chip8.key.at(i) = 1;            // set state to ON
+                        chip8->key.at(i) = 1;            // set state to ON
                 }
             }
             if (e.type == SDL_KEYUP)                    // key released
@@ -114,17 +115,17 @@ int main(int argc, char* argv[])
                 for (int i = 0; i < 16; ++i) 
                 {
                     if (e.key.keysym.sym == keypad[i])  // get key
-                        chip8.key.at(i) = 0;            // set state to OFF
+                        chip8->key.at(i) = 0;           // set state to OFF
                 }
             }
         }
 
-        if (chip8.drawFlag)                             // drawing to screen
+        if (chip8->drawFlag)                            // drawing to screen
         {
             // updating screen and textures
             for (int i = 0; i < 2048; ++i) 
             {
-                uint8_t currPx = chip8.display[i];
+                uint8_t currPx = chip8->display[i];
                 buffer[i] = (0x00FFFFFF * currPx) | 0xFF000000;
             }
 
