@@ -53,7 +53,7 @@ CMake
   mkdir build && cd build
   cmake ..
   make
-  ./chip8 [scale] ../roms/<ROM>
+  ./chip8 [scale] ../roms/<ROM-name>.ch8
 ```
 <br><br>
 
@@ -72,5 +72,6 @@ CMake
 
 
 ### references:
- - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
- - http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/Chip8.pdf
+ - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM                                (opcodes)
+ - https://multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/  (0xDxyn implementation)
+ - https://en.wikipedia.org/wiki/CHIP-8                                            (general info)
