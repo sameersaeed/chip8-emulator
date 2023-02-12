@@ -1,7 +1,8 @@
 /**
  * References:
- * - http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/chip8.pdf
- * - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
+ * http://devernay.free.fr/hacks/chip8/C8TECH10.HTM                                 (opcodes)
+ * https://multigesture.net/articles/how-to-write-an-emulator-chip-8-interpreter/   (0xDxyn implementation)
+ * https://en.wikipedia.org/wiki/CHIP-8                                             (general info)
 */
 
 #include "Chip8.h"
@@ -41,14 +42,14 @@ int main(int argc, char* argv[])
 
     if (atoi(argv[1]) <= 0)
     {
-        std::cout << "[ERROR] display scale must be at least 1\n"; 
+        std::cout << "[ERROR]\t\tdisplay scale must be at least 1\n"; 
         return -2;
     }
 
     std::vector<uint32_t> buffer;                   // storing pixel data
     buffer.resize(2048);
     
-    std::unique_ptr<Chip8> chip8{ new Chip8() };    // creating chip8 instance
+    std::unique_ptr<Chip8> chip8 { new Chip8() };   // creating chip8 instance
 
     SDL_Window* window = NULL;
     int scale = atoi(argv[1]);                      // user can set window size
@@ -69,7 +70,7 @@ int main(int argc, char* argv[])
                               256 * scale,          // width
                               128 * scale,          // height
                               SDL_WINDOW_SHOWN
-                            );
+                             );
 
     if (window == NULL)
     {
@@ -79,10 +80,10 @@ int main(int argc, char* argv[])
 
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
     SDL_Texture* texture = SDL_CreateTexture(renderer,
-                                            SDL_PIXELFORMAT_ARGB8888,
-                                            SDL_TEXTUREACCESS_STREAMING,
-                                            64, 
-                                            32
+                                             SDL_PIXELFORMAT_ARGB8888,
+                                             SDL_TEXTUREACCESS_STREAMING,
+                                             64, 
+                                             32
                                             );
 
     if (!chip8->loadROM(argv[2]))
@@ -91,9 +92,9 @@ int main(int argc, char* argv[])
         return -5;
     }
 
-    while (1)               // emulator loaded succesfully
+    while (1)                                           // emulator loaded succesfully
     {
-        chip8->cycle();      // cycle thru instructions
+        chip8->cycle();                                 // cycle thru instructions
         
         SDL_Event e;
         while (SDL_PollEvent(&e)) 
@@ -107,7 +108,7 @@ int main(int argc, char* argv[])
                 for (int i = 0; i < 16; ++i) 
                 {
                     if (e.key.keysym.sym == keypad[i])  // get key
-                        chip8->key.at(i) = 1;            // set state to ON
+                        chip8->key.at(i) = 1;           // set state to ON
                 }
             }
             if (e.type == SDL_KEYUP)                    // key released
@@ -124,22 +125,19 @@ int main(int argc, char* argv[])
         {
             // updating screen and textures
             for (int i = 0; i < 2048; ++i) 
-            {
-                uint8_t currPx = chip8->display[i];
-                buffer[i] = (0x00FFFFFF * currPx) | 0xFF000000;
-            }
+                buffer[i] = (0x00FFFFFF * chip8->display[i]) | 0xFF000000;
 
             SDL_UpdateTexture(texture, 
                               NULL, 
                               static_cast<void*>(buffer.data()), 
                               64 * sizeof(uint32_t)
-                              );
+                             );
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, 
                            texture, 
                            NULL, 
                            NULL
-                           );
+                          );
             SDL_RenderPresent(renderer);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1));

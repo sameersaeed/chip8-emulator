@@ -4,20 +4,13 @@ Chip8::Chip8() : pc(0x200), opcode(0), index(0), sp(0) {}
 
 Chip8::~Chip8(){}
 
-
 void Chip8::reset()
 {
-    memory.resize(4096);       // initializing vector sizes
+    memory.resize(4096);                            // initializing vector sizes
     display.resize(64 * 64);
     stack.resize(16);
     key.resize(16);
     V.resize(16);
-
-    std::fill(memory.begin(), memory.end(), 0);     // clearing memory
-    std::fill(display.begin(), display.end(), 0);   // toggling all pixels off
-    std::fill(stack.begin(), stack.end(), 0);       // emptying stack
-    std::fill(key.begin(), key.end(), 0);           // resetting keypad inputs
-    std::fill(V.begin(), V.end(), 0);               // clearing registers V0-VF
 
     // resetting timers
     soundTimer = 0;
@@ -64,11 +57,13 @@ void Chip8::cycle()
     // fetch
     opcode  = memory[pc] << 8 | memory[pc + 1];
 
-    mask    = oc & 0x000F;
-    byte    = oc & 0x00FF;
-    addr    = oc & 0x0FFF;
-    x       = (oc & 0x0F00) >> 8;
-    y       = (oc & 0x00F0) >> 4; 
+    mask    = opcode & 0x000F;
+
+    byte    = opcode & 0x00FF;                      // aka "kk"
+    addr    = opcode & 0x0FFF;                      
+
+    x       = (opcode & 0x0F00) >> 8;
+    y       = (opcode & 0x00F0) >> 4; 
     
     // decode
     switch(opcode & 0xF000)
@@ -83,7 +78,7 @@ void Chip8::cycle()
                      RET();
                     break;
                 default:                            // invalid opcode
-                    printf("Unknown opcode [0x00E?]: %.4X\n", opcode);
+                    std::cerr << "Unknown opcode [0x00E?]: " << std::hex << std::uppercase << opcode << "\n";
                     return;
             } 
             break;
@@ -139,7 +134,8 @@ void Chip8::cycle()
                     SHL();                          //              by 1 (mul by 2)
                     break;
                 default:                            // invalid opcode
-                    printf("\nUnknown opcode [0x8xy?]: %.4X\n", opcode);
+                    std::cerr << "Unknown opcode [0x8xy?]: " << std::hex << std::uppercase << opcode << "\n";
+                    return;
             }
             break;
         case oc_9xy0:                               // 9xy0 (SNE) : skip next instruction if Vx != Vy
@@ -167,7 +163,8 @@ void Chip8::cycle()
                     SKNP();
                     break;
                 default:                            // invalid opcode
-                    printf("\nUnknown opcode [0xEx??]: %.4X\n", opcode);
+                    std::cerr << "Unknown opcode [0xEx?]: " << std::hex << std::uppercase << opcode << "\n";
+                    return;
             }
             break;
         case oc_Fx__:                               // Fx??
@@ -201,11 +198,13 @@ void Chip8::cycle()
                     LD_rVF();
                     break;
                 default:                            // invalid opcode
-                    printf("Unknown opcode [0xF000]: 0x%X\n", opcode);
+                    std::cerr << "Unknown opcode [0xF000]: " << std::hex << std::uppercase << opcode << "\n";
+                    return;
             }
             break;
-        default:                                    // invalid opcode
-            printf("Invalid opcode: %.4X\n", opcode);
+        default:                                    // invalid opcode, starts with val outside of hex range 0-F
+            std::cerr << "Unknown opcode [0x?000]: " << std::hex << std::uppercase << opcode << "\n";
+            return;
     }
     // updating timers 
     if (delayTimer > 0)

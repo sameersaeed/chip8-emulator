@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 
 #ifndef CHIP8_H
@@ -11,6 +12,7 @@ public:
     Chip8();
     ~Chip8();
     
+    void printError(std::string range, uint16_t opcode);
     void cycle();
     bool loadROM(const char* ROM);
     
@@ -72,8 +74,6 @@ private:
     uint16_t index;
     uint16_t sp;
     
-    uint16_t& oc = opcode;
-
     uint8_t delayTimer;
     uint8_t soundTimer;
 
