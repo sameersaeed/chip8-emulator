@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 #ifndef CHIP8_H
 #define CHIP8_H
@@ -12,70 +13,70 @@ public:
     Chip8();
     ~Chip8();
     
-    void printError(std::string range, uint16_t opcode);
     void cycle();
     bool loadROM(const char* ROM);
     
-    std::vector<uint8_t> display;
-    std::vector<uint8_t> key;
+    std::vector<std::uint8_t> display;
+    std::vector<std::uint8_t> key;
 
-    uint16_t mask;              // nibble - opcode & 0x000F         
-    uint16_t byte;              // kk     - opcode & 0x00FF         
-    uint16_t addr;              // addr   - opcode & 0x0FFF         
-    uint16_t x;                 // (opcode & 0x0F00) >> 8  
-    uint16_t y;                 // (opcode & 0x00F0) >> 4  
+    std::uint16_t mask;              // nibble - opcode & 0x000F         
+    std::uint16_t byte;              // kk     - opcode & 0x00FF         
+    std::uint16_t addr;              // addr   - opcode & 0x0FFF         
+    std::uint16_t x;                 // (opcode & 0x0F00) >> 8  
+    std::uint16_t y;                 // (opcode & 0x00F0) >> 4  
 
     bool drawFlag;
 
 private:
     void reset();           
+    void handleOpcodeError(const char* opcodeStr, std::uint16_t opcodeVal);
 
-    // Instructions
-    void CLS();                 // 00E0 - CLS
-    void RET();                 // 00EE - RET
-    void JP_addr();             // 1nnn - JP
-    void CALL();                // 2nnn - CALL
-    void SE_Vx_byte();          // 3xkk - SE Vx Vy
-    void SNE_Vx_byte();         // 4xkk - SNE Vx byte
-    void SE_VxVy();             // 5xy0 - SE Vx Vy
-    void LD_Vx_byte();          // 6xkk - LD Vx byte
-    void ADD_Vx_byte();         // 7xkk - ADD Vx byte
-    void LD_VxVy();             // 8xy0 - LD Vx Vy
-    void OR();                  // 8xy1 - OR Vx Vy
-    void AND();                 // 8xy2 - AND Vx Vy
-    void XOR();                 // 8xy3 - XOR Vx Vy
-    void ADD_VxVy();            // 8xy4 - ADD Vx Vy
-    void SUB();                 // 8xy5 - SUB Vx Vy
-    void SHR();                 // 8xy6 - SHR Vx { Vy}
-    void SUBN();                // 8xy7 - SUBN Vx Vy
-    void SHL();                 // 8xyE - SHL Vx { Vy}
-    void SNE_VxVy();            // 9xy0 - SNE Vx Vy
-    void LD_I_addr();           // Annn - LD I addr   
-    void JP_addrV0();           // Bnnn - JP V0 addr
-    void RND();                 // Cxkk - RND Vx byte
-    void DRW();                 // Dxyn - DRW Vx Vy nibble
-    void SKP();                 // Ex9E - SKP Vx
-    void SKNP();                // ExA1 - SKNP Vx 
-    void LD_Vx_t();             // Fx07 - LD Vx DT
-    void LD_Vx_k();             // Fx0A - LD Vx k
-    void LD_t_Vx(uint8_t& t);   // Fx15 & Fx18 - LD DT/ST Vx
-    void ADD_I_Vx();            // Fx1E - ADD I Vx
-    void LD_F_Vx();             // Fx29 - LD F Vx
-    void LD_BCD();              // Fx33 - LD B Vx (Vx BCD)
-    void LD_wVF();              // Fx55 - LD [I] Vx (write)
-    void LD_rVF();              // Fx65 - LD Vx. [I] (read)
+    // instructions
+    void CLS();                         // 00E0 - CLS
+    void RET();                         // 00EE - RET
+    void JP_addr();                     // 1nnn - JP
+    void CALL();                        // 2nnn - CALL
+    void SE_Vx_byte();                  // 3xkk - SE Vx Vy
+    void SNE_Vx_byte();                 // 4xkk - SNE Vx byte
+    void SE_VxVy();                     // 5xy0 - SE Vx Vy
+    void LD_Vx_byte();                  // 6xkk - LD Vx byte
+    void ADD_Vx_byte();                 // 7xkk - ADD Vx byte
+    void LD_VxVy();                     // 8xy0 - LD Vx Vy
+    void OR();                          // 8xy1 - OR Vx Vy
+    void AND();                         // 8xy2 - AND Vx Vy
+    void XOR();                         // 8xy3 - XOR Vx Vy
+    void ADD_VxVy();                    // 8xy4 - ADD Vx Vy
+    void SUB();                         // 8xy5 - SUB Vx Vy
+    void SHR();                         // 8xy6 - SHR Vx { Vy}
+    void SUBN();                        // 8xy7 - SUBN Vx Vy
+    void SHL();                         // 8xyE - SHL Vx { Vy}
+    void SNE_VxVy();                    // 9xy0 - SNE Vx Vy
+    void LD_I_addr();                   // Annn - LD I addr   
+    void JP_addrV0();                   // Bnnn - JP V0 addr
+    void RND();                         // Cxkk - RND Vx byte
+    void DRW();                         // Dxyn - DRW Vx Vy nibble
+    void SKP();                         // Ex9E - SKP Vx
+    void SKNP();                        // ExA1 - SKNP Vx 
+    void LD_Vx_t();                     // Fx07 - LD Vx DT
+    void LD_Vx_k();                     // Fx0A - LD Vx k
+    void LD_t_Vx(std::uint8_t timer);   // Fx15 & Fx18 - LD DT/ST Vx
+    void ADD_I_Vx();                    // Fx1E - ADD I Vx
+    void LD_F_Vx();                     // Fx29 - LD F Vx
+    void LD_BCD();                      // Fx33 - LD B Vx (Vx BCD)
+    void LD_wVF();                      // Fx55 - LD [I] Vx (write)
+    void LD_rVF();                      // Fx65 - LD Vx. [I] (read)
 
-    std::vector<uint8_t> V;
-    std::vector<uint16_t> stack;
-    std::vector<uint8_t> memory;
+    std::vector<std::uint8_t> V;        // registers V0 - VF
+    std::vector<std::uint16_t> stack;
+    std::vector<std::uint8_t> memory;
 
-    uint16_t opcode;
-    uint16_t pc;
-    uint16_t index;
-    uint16_t sp;
+    std::uint16_t opcode;
+    std::uint16_t pc;
+    std::uint16_t index;
+    std::uint16_t sp;
     
-    uint8_t delayTimer;
-    uint8_t soundTimer;
+    std::uint8_t delayTimer;
+    std::uint8_t soundTimer;
 
     enum opcodes                  // Instruction opcodes
     {
@@ -119,7 +120,7 @@ private:
         oc_Fx65    =   0x0065,    // Fx65 : LD Vx, [I]
     };
 
-    uint8_t fontset[80] =               // font hex representations
+    std::uint8_t fontset[80] =          // font hex representations
     {
         0xF0, 0x90, 0x90, 0x90, 0xF0,   // 0
         0x20, 0x60, 0x20, 0x20, 0x70,   // 1

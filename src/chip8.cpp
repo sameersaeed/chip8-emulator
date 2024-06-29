@@ -1,12 +1,12 @@
-#include "Chip8.h"
+#include "chip8.hpp"
 
 Chip8::Chip8() : pc(0x200), opcode(0), index(0), sp(0) {}
 
-Chip8::~Chip8(){}
+Chip8::~Chip8() {}
 
-void Chip8::reset()
-{
-    memory.resize(4096);                            // initializing vector sizes
+void Chip8::reset() {
+    // initializing vector sizes
+    memory.resize(4096);                            
     display.resize(64 * 64);
     stack.resize(16);
     key.resize(16);
@@ -16,45 +16,46 @@ void Chip8::reset()
     soundTimer = 0;
     delayTimer = 0;
 
+    // loading fonts into memory
     for (int i = 0; i < 80; ++i)
-        memory[i] = fontset[i];                     // loading fonts into memory
+        memory[i] = fontset[i];                     
 
-    srand(time(NULL));                              // rng
+    // rng
+    srand(time(NULL));                             
 }
 
+void Chip8::handleOpcodeError(const char* opcodeStr, std::uint16_t opcodeVal) {
+    std::cerr << "ERROR\t(chip8):\tUnknown opcode [" << opcodeStr << "]: " 
+        << std::hex << std::uppercase << opcodeVal << "\n";
+}
 
-bool Chip8::loadROM(const char* ROM)
-{
-    reset();                                        // initializing data
+bool Chip8::loadROM(const char* path) {
+    // initializing Chip8 and loading ROM from given path 
+    reset();                                     
+    std::ifstream file(path, std::ios::ate);         
 
-    std::ifstream f(ROM, std::ios::ate);            // seeking EOF
+    if (file.is_open()) {
+        std::streampos fileSize = file.tellg();
+        std::vector<char> buffer(fileSize);         
 
-    if (f.is_open())
-    {
-        std::streampos fileSize = f.tellg();        // getting file's size
-        std::vector<char> buf(fileSize);            // file buffer
-
-        // reading file from beginning to end
-        f.seekg(0, std::ios::beg);
-        f.read(&buf[0], fileSize);                  // storing data within buffer
-        f.close();
+        // reading file from beginning 
+        file.seekg(0, std::ios::beg);
+        file.read(&buffer[0], fileSize);            // storing data within buffer
+        file.close();
 
         for(long i = 0; i < fileSize; ++i)
-            memory[0x200 + i] = buf[i];             // loading buffer data to memory
+            memory[0x200 + i] = buffer[i];          // loading buffer data to memory
         return true;
     }
-    else
-    {
-        std::cerr << "Error: Could not load file: " << ROM << "\n";
+    else {
+        std::cerr << "[ERROR]\tcouldn't load ROM file at path: " << path << "\n";
         return false;
     }
 }
 
-
 // CPU cycles: fetch --> decode --> execute opcode
-void Chip8::cycle() 
-{ 
-    // fetch
+void Chip8::cycle() { 
+    // fetching
     opcode  = memory[pc] << 8 | memory[pc + 1];
 
     mask    = opcode & 0x000F;
@@ -65,12 +66,10 @@ void Chip8::cycle()
     x       = (opcode & 0x0F00) >> 8;
     y       = (opcode & 0x00F0) >> 4; 
     
-    // decode
-    switch(opcode & 0xF000)
-    {
+    // decoding and executing
+    switch(opcode & 0xF000) {
         case oc_00E_:                               // 00E? 
-            switch (mask) 
-            { 
+            switch (mask) { 
                 case oc_00E0:                       // 00E0 (CLS) : clears display
                     CLS();
                     break;
@@ -78,8 +77,7 @@ void Chip8::cycle()
                      RET();
                     break;
                 default:                            // invalid opcode
-                    std::cerr << "Unknown opcode [0x00E?]: " << std::hex << std::uppercase << opcode << "\n";
-                    return;
+                    handleOpcodeError("[0x00E?]", opcode);
             } 
             break;
         case oc_1nnn:                               // 1nnn (JP) : jumps to addr
@@ -104,8 +102,7 @@ void Chip8::cycle()
             ADD_Vx_byte();
             break;
         case oc_8xy_:                               // 8xy?
-            switch (mask) 
-            {
+            switch (mask) {
                 case oc_8xy0:                       // 8xy0 (LD) : stores value of Vy in Vx
                     LD_VxVy();
                     break;
@@ -154,8 +151,7 @@ void Chip8::cycle()
             DRW();                                  //              memory location I at (Vx, Vy), set
             break;                                  //              VF = collision
         case oc_Ex__:                               // Ex??
-            switch (byte) 
-            {
+            switch (byte) {
                 case oc_Ex9E:                       // Ex9E (SKP) : skip next instruction if key with value of Vx is pressed
                     SKP();
                     break;
@@ -168,8 +164,7 @@ void Chip8::cycle()
             }
             break;
         case oc_Fx__:                               // Fx??
-            switch (byte)
-            {
+            switch (byte) {
                 case oc_Fx07:                       // Fx07 (LD) : set Vx to the value of the delay timer
                     LD_Vx_t();
                     break;
@@ -198,76 +193,95 @@ void Chip8::cycle()
                     LD_rVF();
                     break;
                 default:                            // invalid opcode
-                    std::cerr << "Unknown opcode [0xF000]: " << std::hex << std::uppercase << opcode << "\n";
+                    handleOpcodeError("[0xF000]", opcode);
                     return;
             }
             break;
         default:                                    // invalid opcode, starts with val outside of hex range 0-F
-            std::cerr << "Unknown opcode [0x?000]: " << std::hex << std::uppercase << opcode << "\n";
+            handleOpcodeError("[0x?000]", opcode);
             return;
     }
+
     // updating timers 
     if (delayTimer > 0)
         --delayTimer;
+
     if (soundTimer > 0)
         --soundTimer;
 }
 
-
 // 00E0
-void Chip8::CLS()   
-{
+void Chip8::CLS() {
     for (int i = 0; i < 2048; ++i) 
-        display[i] = 0;            
+        display[i] = 0;
+
     drawFlag = true;
     pc += 2;
 }                                                   
 
 // 00EE
-void Chip8::RET() 
-{
+void Chip8::RET() {
     --sp;
     pc = stack[sp];
     pc += 2;
 }                                         
 
 // 1nnn
-void Chip8::JP_addr() { pc = addr; }                                                        
+void Chip8::JP_addr() { 
+    pc = addr; 
+}                                                        
 
 // 2nnn
-void Chip8::CALL() 
-{
+void Chip8::CALL() {
     stack[sp] = pc;
     ++sp;
     pc = addr;
 }                                                        
 
 // 3xkk
-void Chip8::SE_Vx_byte() { pc += (V[x] == byte) ? 4 : 2; }                                            
+void Chip8::SE_Vx_byte() { 
+    pc += (V[x] == byte) ? 4 : 2; 
+}                                            
 
 // 4xkk
-void Chip8::SNE_Vx_byte() { pc += (V[x] != byte) ? 4 : 2; }                                           
+void Chip8::SNE_Vx_byte() { 
+    pc += (V[x] != byte) ? 4 : 2; 
+}                                           
 
 // 5xy0
-void Chip8::SE_VxVy() { pc += (V[x] == V[y]) ? 4 : 2; }                                              
+void Chip8::SE_VxVy() { 
+    pc += (V[x] == V[y]) ? 4 : 2; 
+}                                              
 
 // 6xkk
-void Chip8::LD_Vx_byte() { V[x] = byte; pc += 2; }                                                         
+void Chip8::LD_Vx_byte() { 
+    V[x] = byte; pc += 2; 
+}                                                         
 
 // 7xkk
-void Chip8::ADD_Vx_byte() { V[x] += byte; pc += 2; }                                                        
+void Chip8::ADD_Vx_byte() { 
+    V[x] += byte; pc += 2; 
+}                                                        
 
 // 8xy0
-void Chip8::LD_VxVy() { V[x] = V[y]; pc += 2; }                                                         
+void Chip8::LD_VxVy() { 
+    V[x] = V[y]; pc += 2; 
+}                                                         
 
 // 8xy1
-void Chip8::OR() { V[x] |= V[y]; pc += 2; }                                                         
+void Chip8::OR() { 
+    V[x] |= V[y]; pc += 2; 
+}                                                         
 
 // 8xy2
-void Chip8::AND() { V[x] &= V[y]; pc += 2; }                                                         
+void Chip8::AND() { 
+    V[x] &= V[y]; pc += 2; 
+}                                                         
 
 // 8xy3
-void Chip8::XOR() { V[x] ^= V[y]; pc += 2; }                                                          
+void Chip8::XOR() { 
+    V[x] ^= V[y]; pc += 2; 
+}                                                          
 
 // 8xy4
 void Chip8::ADD_VxVy() 
@@ -291,6 +305,7 @@ void Chip8::SHR()
     V[0xF] = (V[x] & 0x01);
     if(V[x] >> 1)
         V[x] >>= 1;
+
     pc += 2; 
 }                                
 
@@ -311,34 +326,39 @@ void Chip8::SHL()
 }                                             
 
 // 9xy0
-void Chip8::SNE_VxVy() { pc += (V[x] != V[y]) ? 4 : 2; }                                            
+void Chip8::SNE_VxVy() { 
+    pc += (V[x] != V[y]) ? 4 : 2; 
+}                                            
 
 // Annn
-void Chip8::LD_I_addr() { index = addr; pc += 2; }                                                     
+void Chip8::LD_I_addr() { 
+    index = addr; pc += 2; 
+}                                                     
 
 // Bnnn
-void Chip8::JP_addrV0() { pc = (addr) + V[0]; }                               
+void Chip8::JP_addrV0() { 
+    pc = (addr) + V[0]; 
+}                               
 
 // Cxkk
-void Chip8::RND() { V[x] = (rand() % (0xFF + 1)) & byte; pc += 2; }                                                       
+void Chip8::RND() { 
+    V[x] = (rand() % (0xFF + 1)) & byte; pc += 2; 
+}                                                       
 
 // Dxyn
-void Chip8::DRW() 
-{
+void Chip8::DRW() {
     uint16_t xPos = V[x] % 64;           
     uint16_t yPos = V[y] % 32;
     uint16_t px;
 
     V[0xF] = 0;
-    for (int i = 0; i < mask; ++i)          
-    {
+    for (int i = 0; i < mask; ++i) {
         px = memory[index + i];             
-        for(int j = 0; j < 8; ++j)          
-        {
-            if((px & (0x80 >> j)) != 0)     
-            {
-                if(display[(xPos + j + ((yPos + i) * 64))] == 1) 
+        for(int j = 0; j < 8; ++j) {
+            if((px & (0x80 >> j)) != 0) {
+                if(display[(xPos + j + ((yPos + i) * 64))] == 1)
                     V[0xF] = 1;
+
                 display[xPos + j + ((yPos + i) * 64)] ^= 1;
             }
         }
@@ -348,11 +368,12 @@ void Chip8::DRW()
 } 
 
 // Ex9E
-void Chip8::SKP() { pc += (key[V[x]] != 0) ? 4 : 2; }                  
+void Chip8::SKP() { 
+    pc += (key[V[x]] != 0) ? 4 : 2; 
+}                  
 
 // ExA1
-void Chip8::SKNP() 
-{
+void Chip8::SKNP() {
     if (key[V[x]] == 0)
         pc += 4;
     else
@@ -360,45 +381,49 @@ void Chip8::SKNP()
 }                 
 
 // Fx07
-void Chip8::LD_Vx_t() { V[x] = delayTimer; pc += 2; }                                                           
+void Chip8::LD_Vx_t() { 
+    V[x] = delayTimer; pc += 2; 
+}                                                           
 
 // Fx0A
-void Chip8::LD_Vx_k() 
-{
+void Chip8::LD_Vx_k() {
     bool key_pressed = false;
-    for(int i = 0; i < 16; ++i)
-    {
-        if(key[i] != 0)
-        {
+    for(int i = 0; i < 16; ++i) {
+        if(key[i] != 0) {
             V[x] = i;
             key_pressed = true;
         }
     }
-    if(!key_pressed)
+
+    if(!key_pressed)    
         return;
+
     pc += 2; 
 }                                                          
 
 // Fx15 & Fx18
-void Chip8::LD_t_Vx(uint8_t& t) { t = V[x]; pc += 2; }                                                           
+void Chip8::LD_t_Vx(uint8_t timer) { 
+    timer = V[x]; pc += 2; 
+}                                                           
 
 // Fx1E        
-void Chip8::ADD_I_Vx() 
-{
-    if(index + V[x] > 0xFFF)
+void Chip8::ADD_I_Vx() {
+    if(index + V[x] > 0xFFF)    
         V[0xF] = 1;
-    else
+    else 
         V[0xF] = 0;
+
     index += V[x];
     pc += 2; 
 }            
 
 // Fx29
-void Chip8::LD_F_Vx() { index = V[x] * 0x5; pc += 2; }            
+void Chip8::LD_F_Vx() { 
+    index = V[x] * 0x5; pc += 2; 
+}            
 
 // Fx33
-void Chip8::LD_BCD() 
-{
+void Chip8::LD_BCD() {
     memory[index]     = V[x] / 100;
     memory[index + 1] = (V[x] / 10) % 10;
     memory[index + 2] = V[x] % 10;
@@ -406,19 +431,19 @@ void Chip8::LD_BCD()
 }                  
 
 // Fx55 (write)
-void Chip8::LD_wVF() 
-{
-    for (int i = 0; i <= x; ++i)
+void Chip8::LD_wVF() {
+    for (int i = 0; i <= x; ++i) 
         memory[index + i] = V[i];
+
     index += x + 1;
     pc += 2; 
 }            
 
 // Fx65 (read)
-void Chip8::LD_rVF() 
-{
+void Chip8::LD_rVF() {
     for (int i = 0; i <= x; ++i)
         V[i] = memory[index + i];
+  
     index += x + 1;
     pc += 2; 
 } 

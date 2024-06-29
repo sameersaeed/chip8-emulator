@@ -1,72 +1,62 @@
-# CHIP-8 Interpreter
+# CHIP-8
 
-an interpreter for the CHIP-8 programming language written in C++. uses SDL for input/graphics
-<br><br>
-CHIP-8 was first introduced in the 1970s. many famous classic games like Tetris, Pac-Man, Pong, etc. were ported to it
-<br><br>
-this is an interpreter and not an emulator because the CHIP-8 isn't a physical machine being emulated, but rather a virutal machine running CHIP-8 programs
-<br><br>
-
-
-
-### **usage:**
-```console
-./chip8 [screen-scale-factor] <path-to-ROM>
-```
+a basic chip8 emulator written in C++. uses SDL for input/graphics
+<br>
+**note:** all of the roms in this repository are public domain
 <br><br>
 
 
 
 ### **prerequisite libraries:**
 
-SDL2
-<br>
-&emsp; installation:
+SDL2 installation:
 ```console
-  Debian/Ubuntu:  sudo apt-get install libsdl2-dev -y
+Debian/Ubuntu:  sudo apt-get install libsdl2-dev -y
   
-  or check out the SDL2 wiki's Installation section:
-    https://wiki.libsdl.org/SDL2/Installation        
+or check out the SDL2 wiki's **Installation** section:
+  https://wiki.libsdl.org/SDL2/Installation        
 ```
 <br>
 
-CMake
-<br>
-&emsp; installation:
+CMake installation:
 ```console
-  Debian/Ubuntu:  sudo apt-get install cmake
+Debian/Ubuntu:  sudo apt-get install cmake
   
-  or download directly from their website:
-    https://cmake.org/download/
-```
-<br>
-
-### **setup:**
-&emsp; to install this repository 
-```
-  git clone "https://github.com/sameersaeed/chip8-interpreter"
-```
-<br>
-
-&emsp; building (starting from project root)
-```console
-  mkdir build && cd build
-  cmake ..
-  make
-  ./chip8 [scale] ../roms/<ROM-name>.ch8
+or download directly from their website:
+  https://cmake.org/download/
 ```
 <br><br>
 
 
 
-### **sample installation / run:**
-```console
-                          ...$  git clone "https://github.com/sameersaeed/chip8-interpreter" && cd chip8-interpreter
-        .../chip8-interpreter$  mkdir build && cd build
-  .../chip8-interpreter/build$  cmake .. 
-  .../chip8-interpreter/build$  make
-  .../chip8-interpreter/build$  ./chip8 3 ../roms/Maze.ch8        <-- creates a 3 * (64 x 32px) = 192 x 96px display
+### **setup:**
+&emsp; to install this repository:
 ```
+git clone "https://github.com/sameersaeed/chip8-interpreter"
+```
+<br>
+
+&emsp; building (starting from project root):
+```console
+mkdir build && cd build
+cmake ..
+make
+./chip8 <scale> ../roms/<ROM-name>.ch8
+```
+<br><br>
+
+
+
+### **sample installation + run:**
+```console
+git clone "https://github.com/sameersaeed/chip8-interpreter" 
+cd chip8-interpreter
+mkdir build && cd build
+cmake .. 
+make
+./chip8 3 ../roms/Maze.ch8
+```
+a scale factor of 3 creates a 192 x 96px display (3 * (64 x 32px) = 192 x 96px)
 <br><br>
 
 
