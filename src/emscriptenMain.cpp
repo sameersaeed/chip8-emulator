@@ -38,5 +38,6 @@ void mainLoop() {
 
 int main() {
     emscripten_set_main_loop(mainLoop, 0, 0);
-    return EXIT_SUCCESS;
+    
+    return 0;
 }
