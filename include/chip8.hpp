@@ -1,14 +1,13 @@
+#ifndef CHIP8_HPP
+#define CHIP8_HPP
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <cstdint>
 
-#ifndef CHIP8_H
-#define CHIP8_H
-
-class Chip8
-{
+class Chip8 {
 public:
     Chip8();
     ~Chip8();
@@ -19,11 +18,11 @@ public:
     std::vector<std::uint8_t> display;
     std::vector<std::uint8_t> key;
 
-    std::uint16_t mask;              // nibble - opcode & 0x000F         
-    std::uint16_t byte;              // kk     - opcode & 0x00FF         
-    std::uint16_t addr;              // addr   - opcode & 0x0FFF         
-    std::uint16_t x;                 // (opcode & 0x0F00) >> 8  
-    std::uint16_t y;                 // (opcode & 0x00F0) >> 4  
+    std::uint16_t mask;                 // nibble - opcode & 0x000F         
+    std::uint16_t byte;                 // kk     - opcode & 0x00FF         
+    std::uint16_t addr;                 // addr   - opcode & 0x0FFF         
+    std::uint16_t x;                    // (opcode & 0x0F00) >> 8  
+    std::uint16_t y;                    // (opcode & 0x00F0) >> 4  
 
     bool drawFlag;
 
@@ -59,69 +58,67 @@ private:
     void SKNP();                        // ExA1 - SKNP Vx 
     void LD_Vx_t();                     // Fx07 - LD Vx DT
     void LD_Vx_k();                     // Fx0A - LD Vx k
-    void LD_t_Vx(std::uint8_t timer);   // Fx15 & Fx18 - LD DT/ST Vx
+    void LD_t_Vx(std::uint8_t& timer);  // Fx15 & Fx18 - LD DT/ST Vx
     void ADD_I_Vx();                    // Fx1E - ADD I Vx
     void LD_F_Vx();                     // Fx29 - LD F Vx
     void LD_BCD();                      // Fx33 - LD B Vx (Vx BCD)
     void LD_wVF();                      // Fx55 - LD [I] Vx (write)
     void LD_rVF();                      // Fx65 - LD Vx. [I] (read)
 
-    std::vector<std::uint8_t> V;        // registers V0 - VF
-    std::vector<std::uint16_t> stack;
-    std::vector<std::uint8_t> memory;
+    std::vector<std::uint8_t>  m_V;     // registers V0 - VF
+    std::vector<std::uint8_t>  m_memory;
+    std::vector<std::uint16_t> m_stack;
 
-    std::uint16_t opcode;
-    std::uint16_t pc;
-    std::uint16_t index;
-    std::uint16_t sp;
+    std::uint16_t m_index;
+    std::uint16_t m_opcode;
+    std::uint16_t m_pc;
+    std::uint16_t m_sp;
     
-    std::uint8_t delayTimer;
-    std::uint8_t soundTimer;
+    std::uint8_t m_delayTimer;
+    std::uint8_t m_soundTimer;
 
-    enum opcodes                  // Instruction opcodes
-    {
-        oc_00E_    =   0x0000,    // 00E?
-        oc_00E0    =   0x0000,    // 00E0 : CLS
-        oc_00EE    =   0x000E,    // 00EE : RET
-        oc_1nnn    =   0x1000,    // 1nnn : JMP addr
-        oc_2nnn    =   0x2000,    // 2nnn : CALL addr
-        oc_3xkk    =   0x3000,    // 3xkk : SE Vx, byte
-        oc_4xkk    =   0x4000,    // 4xkk : SNE Vx, byte
-        oc_5xy0    =   0x5000,    // 5xy0 : SE Vx, Vy
-        oc_6xkk    =   0x6000,    // 6xkk : LD Vx, byte
-        oc_7xkk    =   0x7000,    // 7xkk : ADD Vx, byte
-        oc_8xy_    =   0x8000,    // 8xy?
-        oc_8xy0    =   0x0000,    // 8xy0 : LD Vx, Vy
-        oc_8xy1    =   0x0001,    // 8xy1 : OR Vx, Vy
-        oc_8xy2    =   0x0002,    // 8xy2 : AND Vx, Vy 
-        oc_8xy3    =   0x0003,    // 8xy3 : XOR Vx, Vy
-        oc_8xy4    =   0x0004,    // 8xy4 : ADD Vx, Vy
-        oc_8xy5    =   0x0005,    // 8xy5 : SUB Vx, Vy
-        oc_8xy6    =   0x0006,    // 8xy6 : SHR Vx {, Vy}
-        oc_8xy7    =   0x0007,    // 8xy7 : SUBN Vx, Vy
-        oc_8xyE    =   0x000E,    // 8xyE : SHL Vx, Vy
-        oc_9xy0    =   0x9000,    // 9xy0 : SNE Vx, Vy
-        oc_Annn    =   0xA000,    // Annn : LD I, addr
-        oc_Bnnn    =   0xB000,    // Bnnn : JP V0, addr
-        oc_Cxkk    =   0xC000,    // Cxkk : RND Vx, byte
-        oc_Dxyn    =   0xD000,    // Dxyn : DRW Vx, Vy, nibble
-        oc_Ex__    =   0xE000,    // Ex??
-        oc_Ex9E    =   0x009E,    // Ex9E : SKP Vx
-        oc_ExA1    =   0x00A1,    // ExA1 : SKNP Vx
-        oc_Fx__    =   0xF000,    // Fx??
-        oc_Fx07    =   0x0007,    // Fx07 : LD Vx, DT
-        oc_Fx0A    =   0x000A,    // Fx0A : LD Vx, K
-        oc_Fx15    =   0x0015,    // Fx15 : LD DT, Vx
-        oc_Fx18    =   0x0018,    // Fx18 : LD ST, Vx
-        oc_Fx1E    =   0x001E,    // Fx1E : ADD I, Vx
-        oc_Fx29    =   0x0029,    // Fx29 : LD F, Vx
-        oc_Fx33    =   0x0033,    // Fx33 : LD B, Vx
-        oc_Fx55    =   0x0055,    // Fx55 : LD [I], Vx
-        oc_Fx65    =   0x0065,    // Fx65 : LD Vx, [I]
+    enum opcodes {                      // Instruction opcodes
+        oc_00E_    =   0x0000,          // 00E?
+        oc_00E0    =   0x0000,          // 00E0 : CLS
+        oc_00EE    =   0x000E,          // 00EE : RET
+        oc_1nnn    =   0x1000,          // 1nnn : JMP addr
+        oc_2nnn    =   0x2000,          // 2nnn : CALL addr
+        oc_3xkk    =   0x3000,          // 3xkk : SE Vx, byte
+        oc_4xkk    =   0x4000,          // 4xkk : SNE Vx, byte
+        oc_5xy0    =   0x5000,          // 5xy0 : SE Vx, Vy
+        oc_6xkk    =   0x6000,          // 6xkk : LD Vx, byte
+        oc_7xkk    =   0x7000,          // 7xkk : ADD Vx, byte
+        oc_8xy_    =   0x8000,          // 8xy?
+        oc_8xy0    =   0x0000,          // 8xy0 : LD Vx, Vy
+        oc_8xy1    =   0x0001,          // 8xy1 : OR Vx, Vy
+        oc_8xy2    =   0x0002,          // 8xy2 : AND Vx, Vy 
+        oc_8xy3    =   0x0003,          // 8xy3 : XOR Vx, Vy
+        oc_8xy4    =   0x0004,          // 8xy4 : ADD Vx, Vy
+        oc_8xy5    =   0x0005,          // 8xy5 : SUB Vx, Vy
+        oc_8xy6    =   0x0006,          // 8xy6 : SHR Vx {, Vy}
+        oc_8xy7    =   0x0007,          // 8xy7 : SUBN Vx, Vy
+        oc_8xyE    =   0x000E,          // 8xyE : SHL Vx, Vy
+        oc_9xy0    =   0x9000,          // 9xy0 : SNE Vx, Vy
+        oc_Annn    =   0xA000,          // Annn : LD I, addr
+        oc_Bnnn    =   0xB000,          // Bnnn : JP V0, addr
+        oc_Cxkk    =   0xC000,          // Cxkk : RND Vx, byte
+        oc_Dxyn    =   0xD000,          // Dxyn : DRW Vx, Vy, nibble
+        oc_Ex__    =   0xE000,          // Ex??
+        oc_Ex9E    =   0x009E,          // Ex9E : SKP Vx
+        oc_ExA1    =   0x00A1,          // ExA1 : SKNP Vx
+        oc_Fx__    =   0xF000,          // Fx??
+        oc_Fx07    =   0x0007,          // Fx07 : LD Vx, DT
+        oc_Fx0A    =   0x000A,          // Fx0A : LD Vx, K
+        oc_Fx15    =   0x0015,          // Fx15 : LD DT, Vx
+        oc_Fx18    =   0x0018,          // Fx18 : LD ST, Vx
+        oc_Fx1E    =   0x001E,          // Fx1E : ADD I, Vx
+        oc_Fx29    =   0x0029,          // Fx29 : LD F, Vx
+        oc_Fx33    =   0x0033,          // Fx33 : LD B, Vx
+        oc_Fx55    =   0x0055,          // Fx55 : LD [I], Vx
+        oc_Fx65    =   0x0065,          // Fx65 : LD Vx, [I]
     };
 
-    std::uint8_t fontset[80] =          // font hex representations
-    {
+    std::uint8_t fontset[80] = {        // font hex representations
         0xF0, 0x90, 0x90, 0x90, 0xF0,   // 0
         0x20, 0x60, 0x20, 0x20, 0x70,   // 1
         0xF0, 0x10, 0xF0, 0x80, 0xF0,   // 2

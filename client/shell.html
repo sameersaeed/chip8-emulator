@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>CHIP-8 Emulator</title>
+        <link rel="stylesheet" href="chip8.css">
+        <script async src="index.js"></script>
+    </head>
+    <body>
+        <h1 class="header">CHIP-8 Emulator</h1>
+        <p class="body">
+            A simple CHIP-8 emulator written in C++ and compiled to WebAssembly.
+            <br/>
+            Use the dropdown to select a ROM and press the play button to start the emulator.</p>
+        </p>
+        <p class="body">
+            You can also use the controls mentioned below to interact with the available ROMs
+            <br/>
+            For more information on this project, check out the <a href="https://github.com/sameersaeed/chip8-emulator">GitHub</a>!
+        </p>    
+        <div id="spinner">
+            <div class="spinner"></div>
+        </div>
+        <div class="emscripten" id="status">Downloading...</div>
+        <div class="emscripten">
+            <progress value="0" max="100" id="progress" hidden=1></progress>
+        </div>
+        <div class="emscripten_border">
+            <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+        </div>
+        <div class="emscripten" id="menu">
+            <select id="rom-dropdown">
+            <option>Select a ROM</option>
+            <option value='{"filename": "Maze.ch8"}'>Maze</option>
+            <option value='{"filename": "Pong.ch8"}'>Pong</option>
+            <option value='{"filename": "Tetris.ch8"}'>Tetris</option>
+            <option value='{"filename": "Tic-Tac-Toe.ch8"}'>Tic-Tac-Toe</option>
+            <option value='{"filename": "chip8-test-suite.ch8"}'>chip8-test-suite</option>
+            <option value='{"filename": "ParticleDemo.ch8"}'>ParticleDemo</option>
+            <option value='{"filename": "ZeroDemo.ch8"}'>ZeroDemo</option>
+            </select>
+            <button type="button" id="play-button" disabled>Play</button>
+        </div>
+        <div class="controls">
+            <h4>Controls</h4>
+            <div class="table-container">
+                <table class="keyboard-controls">
+                    <caption>Keyboard</caption>
+                    <thead>
+                        <tr>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>4</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td>Q</td>
+                        <td>W</td>
+                        <td>E</td>
+                        <td>R</td>
+                        </tr>
+                        <tr>
+                        <td>A</td>
+                        <td>S</td>
+                        <td>D</td>
+                        <td>F</td>
+                        </tr>
+                        <tr>
+                        <td>Z</td>
+                        <td>X</td>
+                        <td>C</td>
+                        <td>V</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="chip8-controls">
+                    <caption>CHIP-8</caption>
+                    <thead>
+                        <tr>
+                        <th>1</th>
+                        <th>2</th>
+                        <th>3</th>
+                        <th>C</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <td>4</td>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>D</td>
+                        </tr>
+                        <tr>
+                        <td>7</td>
+                        <td>8</td>
+                        <td>9</td>
+                        <td>E</td>
+                        </tr>
+                        <tr>
+                        <td>A</td>
+                        <td>0</td>
+                        <td>B</td>
+                        <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{{ SCRIPT }}}
+        <script type="text/javascript" src="https://unpkg.com/default-passive-events"></script>
+    </body>
+</html>
