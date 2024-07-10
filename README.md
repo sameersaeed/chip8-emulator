@@ -43,7 +43,7 @@ git clone "https://github.com/sameersaeed/chip8-emulator"
 <br>
 
 
-### building and running the binary
+### building and running the chip8 binary
 starting from project root, run:
 
 ```console
@@ -54,8 +54,21 @@ make
 
 ./chip8 <scale> ../roms/<ROM-name>.ch8
 ```
-if you run the binary correctly, you should see a window pop up on your screen with the ROM running, for example:
+if you run the binary correctly, you should see a window pop up on your screen with the ROM running, for example:<br>
 <img width="714" alt="Screenshot 2024-06-21 at 7 25 51 PM" src="imgs/bin.png">
+
+to execute the tests after building the repository, you can also run the following within the `build` directory:
+```console
+./chip8_test
+
+[==========] Running 33 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 33 tests from Chip8Tests
+[          ] ...
+[==========] Running 33 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 33 tests from Chip8Tests
+```
 
 <br>
 
@@ -65,9 +78,9 @@ if you run the binary correctly, you should see a window pop up on your screen w
 starting from project root, run:
 
 ```console
-cd client/
+cd client
 
-emcc ../src/emscriptenMain.cpp ../src/chip8.cpp ../src/gui.cpp  -I ../include -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=2 -s USE_SDL=2 -s WASM=1 -s SAFE_HEAP=1 -s DISABLE_EXCEPTION_CATCHING=0 -s EXPORTED_FUNCTIONS=_main,_load,_stop -s EXPORTED_RUNTIME_METHODS=ccall,cwrap --no-heap-copy --preload-file ../roms --shell-file shell.html -o chip8.html
+emcc ../src/emscripten_main.cpp ../src/chip8.cpp ../src/gui.cpp  -I ../include -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=2 -s USE_SDL=2 -s WASM=1 -s SAFE_HEAP=1 -s DISABLE_EXCEPTION_CATCHING=0 -s EXPORTED_FUNCTIONS=_main,_load,_stop -s EXPORTED_RUNTIME_METHODS=ccall,cwrap --no-heap-copy --preload-file ../roms --shell-file shell.html -o chip8.html
 ```
 <br>
 
@@ -102,7 +115,7 @@ after doing this, you will also need to make sure to recompile the program using
 
 
 
-## **sample installation + run (binary):**
+## **sample - installation of this repository + running chip8 binary:**
 ```console
 git clone "https://github.com/sameersaeed/chip8-emulator" 
 

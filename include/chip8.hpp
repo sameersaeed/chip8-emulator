@@ -7,6 +7,10 @@
 #include <vector>
 #include <cstdint>
 
+#ifndef EMSCRIPTEN
+#include <gtest/gtest.h>
+#endif
+
 class Chip8 {
 public:
     Chip8();
@@ -25,6 +29,43 @@ public:
     std::uint16_t y;                    // (opcode & 0x00F0) >> 4  
 
     bool drawFlag;
+
+#ifndef EMSCRIPTEN
+    friend class Chip8Tests;
+    FRIEND_TEST(Chip8Tests, Test_CLS);
+    FRIEND_TEST(Chip8Tests, Test_RET);
+    FRIEND_TEST(Chip8Tests, Test_JP_addr);
+    FRIEND_TEST(Chip8Tests, Test_CALL);
+    FRIEND_TEST(Chip8Tests, Test_SE_Vx_byte);
+    FRIEND_TEST(Chip8Tests, Test_SNE_Vx_byte);
+    FRIEND_TEST(Chip8Tests, Test_SE_VxVy);
+    FRIEND_TEST(Chip8Tests, Test_LD_Vx_byte);
+    FRIEND_TEST(Chip8Tests, Test_ADD_Vx_byte);
+    FRIEND_TEST(Chip8Tests, Test_LD_VxVy);
+    FRIEND_TEST(Chip8Tests, Test_OR);
+    FRIEND_TEST(Chip8Tests, Test_AND);
+    FRIEND_TEST(Chip8Tests, Test_XOR);
+    FRIEND_TEST(Chip8Tests, Test_ADD_VxVy);
+    FRIEND_TEST(Chip8Tests, Test_SUB);
+    FRIEND_TEST(Chip8Tests, Test_SHR);
+    FRIEND_TEST(Chip8Tests, Test_SUBN);
+    FRIEND_TEST(Chip8Tests, Test_SHL);
+    FRIEND_TEST(Chip8Tests, Test_SNE_VxVy);
+    FRIEND_TEST(Chip8Tests, Test_LD_I_addr);
+    FRIEND_TEST(Chip8Tests, Test_JP_addrV0);
+    FRIEND_TEST(Chip8Tests, Test_RND);
+    FRIEND_TEST(Chip8Tests, Test_DRW);
+    FRIEND_TEST(Chip8Tests, Test_SKP);
+    FRIEND_TEST(Chip8Tests, Test_SKNP);
+    FRIEND_TEST(Chip8Tests, Test_LD_Vx_t);
+    FRIEND_TEST(Chip8Tests, Test_LD_Vx_k);
+    FRIEND_TEST(Chip8Tests, Test_LD_t_Vx);
+    FRIEND_TEST(Chip8Tests, Test_ADD_I_Vx);
+    FRIEND_TEST(Chip8Tests, Test_LD_F_Vx);
+    FRIEND_TEST(Chip8Tests, Test_LD_BCD);
+    FRIEND_TEST(Chip8Tests, Test_LD_wVF);
+    FRIEND_TEST(Chip8Tests, Test_LD_rVF);
+#endif
 
 private:
     void reset();           

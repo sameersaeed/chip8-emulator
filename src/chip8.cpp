@@ -284,50 +284,45 @@ void Chip8::XOR() {
 }                                                          
 
 // 8xy4
-void Chip8::ADD_VxVy() 
-{
+void Chip8::ADD_VxVy() {
     m_V[x] += m_V[y];                   
-    m_V[0xF] =  (m_V[ y] > 0x00F) ? 1 : 0;
+    m_V[0xF] = (m_V[y] > 0x00F) ? 1 : 0;
     m_pc += 2;
 }                                
 
 // 8xy5
-void Chip8::SUB() 
-{
+void Chip8::SUB() {
     m_V[x] = m_V[x] - m_V[y];            
-    m_V[0xF] =  (m_V[ x] > m_V[y]) ? 1 : 0;
+    m_V[0xF] = (m_V[x] > m_V[y]) ? 1 : 0;
     m_pc += 2; 
 }                                
 
 // 8xy6
-void Chip8::SHR() 
-{
-    m_V[0xF] =  (m_V[ x] & 0x01);
-    if (m_V[ x] >> 1)
+void Chip8::SHR() {
+    m_V[0xF] = (m_V[x] & 0x01);
+    if (m_V[x] >> 1)
         m_V[x] >>= 1;
 
     m_pc += 2; 
 }                                
 
 // 8xy7
-void Chip8::SUBN() 
-{
+void Chip8::SUBN() {
     m_V[x] = m_V[y] - m_V[x];             
-    m_V[0xF] =  (m_V[ x] > m_V[y]) ? 0 : 1;
+    m_V[0xF] = (m_V[x] > m_V[y]) ? 0 : 1;
     m_pc += 2;  
 }                               
 
 // 8xyE
-void Chip8::SHL() 
-{
+void Chip8::SHL() {
     m_V[x] <<= 1;
-    m_V[0xF] =  (m_V[ x] >> 7);
+    m_V[0xF] = (m_V[x] >> 7);
     m_pc += 2; 
 }                                             
 
 // 9xy0
 void Chip8::SNE_VxVy() { 
-    m_pc +=  (m_V[ x] != m_V[y]) ? 4 : 2; 
+    m_pc += (m_V[x] != m_V[y]) ? 4 : 2; 
 }                                            
 
 // Annn
@@ -425,7 +420,7 @@ void Chip8::LD_F_Vx() {
 // Fx33
 void Chip8::LD_BCD() {
     m_memory[m_index]     = m_V[x] / 100;
-    m_memory[m_index + 1] = (m_V[ x] / 10) % 10;
+    m_memory[m_index + 1] = (m_V[x] / 10) % 10;
     m_memory[m_index + 2] = m_V[x] % 10;
     m_pc += 2; 
 }                  
