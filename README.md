@@ -27,7 +27,7 @@ or download it directly from the cmake website:
 ```
 <br>
 
-### Emscripten SDK (optional, for WebAssembly):
+### Emscripten SDK (optional, for manually compiling to WebAssembly):
 download + installation guide:
 https://emscripten.org/docs/getting_started/downloads.html
 <br><br>
@@ -54,7 +54,9 @@ make
 
 ./chip8 <scale> ../roms/<ROM-name>.ch8
 ```
-if you run the binary correctly, you should see a window pop up on your screen with the ROM running, for example:<br>
+if you run the binary correctly, you should see a window pop up on your screen with the ROM running. 
+
+for example:<br>
 <img width="714" alt="Screenshot 2024-06-21 at 7 25 51 PM" src="imgs/bin.png">
 
 to execute the tests after building the repository, you can also run the following within the `build` directory:
@@ -73,7 +75,25 @@ to execute the tests after building the repository, you can also run the followi
 <br>
 
 
-### (optional) compiling to WebAssembly
+## Docker setup
+
+you can deploy this project on Docker by running either of the following commands from the project root:
+
+setup using Docker Compose:
+```console
+docker-compose up --build
+```
+
+setup using Docker:
+```console
+docker build -t chip8-web .
+docker run -d -p 3000:80 chip8-web
+```
+once the container is running, you can access the emulator through your web browser by going on [http://localhost:3000/chip8.html](https://github.com/sameersaeed/chip8-emulator)
+<br>
+
+
+### (optional) manually compiling to WebAssembly
 
 starting from project root, run:
 
@@ -85,15 +105,16 @@ emcc ../src/emscripten_main.cpp ../src/chip8.cpp ../src/gui.cpp  -I ../include -
 <br>
 
 
-### to launch the client locally, you can then run:
+to launch the client locally after manual compilation, you can then run either of the following commands:
 
 ```console
 emrun --port <port> .
 ```
-(or)
+or
 ```console
 python3 -m http.server <port>
 ```
+
 ...and then go on [http://localhost:&lt;port&gt;/chip8.html](https://github.com/sameersaeed/chip8-emulator)
 
 from there, you should be able to select a ROM file and load it into your browser:
@@ -101,7 +122,7 @@ from there, you should be able to select a ROM file and load it into your browse
 
 <br>
 
-if you want to use your own .ch8 ROM file(s), you can add them to the roms/ folder of this repository and then update shell.html to add the path(s), i.e.:
+if you want to use your own .ch8 ROM file(s), you can add them to the `roms` folder of this repository and then update `shell.html` to add the path(s), i.e.:
 ```console
   ...
   <option value='{"filename": "chip8-test-suite.ch8"}'>chip8-test-suite</option>
