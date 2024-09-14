@@ -90,6 +90,7 @@ docker build -t chip8-web .
 docker run -d -p 3000:80 chip8-web
 ```
 once the container is running, you can access the emulator through your web browser by going on [http://localhost:3000/chip8.html](https://github.com/sameersaeed/chip8-emulator)
+
 <br>
 
 
