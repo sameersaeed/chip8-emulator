@@ -1,13 +1,13 @@
 # CHIP-8
 
-a basic chip8 emulator written in C++. uses SDL for input/graphics
+A basic CHIP8 emulator written in C++17, uses SDL for input/graphics
 <br>
-**note:** all of the roms in this repository are public domain
+**Note:** All of the roms in this repository are public domain
 <br><br>
 
 
 
-## **prerequisite libraries:**
+## **Prerequisite libraries:**
 
 ### SDL2 installation:
 ```console
@@ -28,23 +28,23 @@ or download it directly from the cmake website:
 <br>
 
 ### Emscripten SDK (optional, for manually compiling to WebAssembly):
-download + installation guide:
+**Download + installation guide:**
 https://emscripten.org/docs/getting_started/downloads.html
 <br><br>
 
 
 
 
-## **setup:**
-### to install this repository:
+## **Setup:**
+### To install this repository:
 ```console
 git clone "https://github.com/sameersaeed/chip8-emulator"
 ```
 <br>
 
 
-### building and running the chip8 binary
-starting from project root, run:
+### Building and running the CHIP8 binary
+Starting from project root, run:
 
 ```console
 mkdir build && cd build
@@ -54,12 +54,13 @@ make
 
 ./chip8 <scale> ../roms/<ROM-name>.ch8
 ```
-if you run the binary correctly, you should see a window pop up on your screen with the ROM running. 
+If you run the binary correctly, you should see a window pop up on your screen with the ROM running. 
 
-for example:<br>
+**For example:**
+<br>
 <img width="714" alt="Screenshot 2024-06-21 at 7 25 51 PM" src="imgs/bin.png">
 
-to execute the tests after building the repository, you can also run the following within the `build` directory:
+To execute the tests after building the repository, you can also run the following within the `build` directory:
 ```console
 ./chip8_test
 
@@ -77,26 +78,26 @@ to execute the tests after building the repository, you can also run the followi
 
 ## Docker setup
 
-you can deploy this project on Docker by running either of the following commands from the project root:
+You can deploy this project on Docker by running either of the following commands from the project root:
 
-setup using Docker Compose:
+Setup using Docker Compose:
 ```console
 docker-compose up --build
 ```
 
-setup using Docker:
+Setup using Docker:
 ```console
 docker build -t chip8-web .
 docker run -d -p 3000:80 chip8-web
 ```
-once the container is running, you can access the emulator through your web browser by going on [http://localhost:3000/chip8.html](https://github.com/sameersaeed/chip8-emulator)
+Once the container is running, you can access the emulator through your web browser by going on [http://localhost:3000/chip8.html](https://github.com/sameersaeed/chip8-emulator)
 
 <br>
 
 
-### (optional) manually compiling to WebAssembly
+### (Optional) Manually compiling to WebAssembly
 
-starting from project root, run:
+Starting from project root, run:
 
 ```console
 cd client
@@ -106,7 +107,7 @@ emcc ../src/emscripten_main.cpp ../src/chip8.cpp ../src/gui.cpp  -I ../include -
 <br>
 
 
-to launch the client locally after manual compilation, you can then run either of the following commands:
+To launch the client locally after manual compilation, you can then run either of the following commands:
 
 ```console
 emrun --port <port> .
@@ -118,12 +119,12 @@ python3 -m http.server <port>
 
 ...and then go on [http://localhost:&lt;port&gt;/chip8.html](https://github.com/sameersaeed/chip8-emulator)
 
-from there, you should be able to select a ROM file and load it into your browser:
+From there, you should be able to select a ROM file and load it into your browser:
 <img width="714" alt="Screenshot 2024-06-21 at 7 25 51 PM" src="imgs/webasm.png">
 
 <br>
 
-if you want to use your own .ch8 ROM file(s), you can add them to the `roms` folder of this repository and then update `shell.html` to add the path(s), i.e.:
+If you want to use your own .ch8 ROM file(s), you can add them to the `roms` folder of this repository and then update `shell.html` to add the path(s), i.e.:
 ```console
   ...
   <option value='{"filename": "chip8-test-suite.ch8"}'>chip8-test-suite</option>
@@ -132,12 +133,12 @@ if you want to use your own .ch8 ROM file(s), you can add them to the `roms` fol
   <option value='{"filename": "<your-rom-file>.ch8"}'>Your ROM's Name</option>
   ...
 ```
-after doing this, you will also need to make sure to recompile the program using the above Emscripten compilation script (emcc)
+After doing this, you will also need to make sure to recompile the program using the above Emscripten compilation script (emcc)
 <br><br>
 
 
 
-## **sample - installation of this repository + running chip8 binary:**
+## **Sample - Installation of this repository + running chip8 binary:**
 ```console
 git clone "https://github.com/sameersaeed/chip8-emulator" 
 
@@ -150,12 +151,12 @@ make
 
 ./chip8 3 ../roms/Maze.ch8
 ```
-a scale factor of 3 creates a 192 x 96px display (3 * (64 x 32px) = 192 x 96px)
+A scale factor of 3 creates a 192 x 96px display (3 * (64 x 32px) = 192 x 96px)
 <br><br>
 
 
 
-## **references:**
+## **References:**
  - http://devernay.free.fr/hacks/chip8/C8TECH10.HTM                                (opcodes)
- - https://multigesture.net/articles/how-to-write-an-emulator-chip-8-emulator/  (0xDxyn implementation)
+ - https://multigesture.net/articles/how-to-write-an-emulator-chip-8-emulator      (0xDxyn implementation)
  - https://en.wikipedia.org/wiki/CHIP-8                                            (general info)
